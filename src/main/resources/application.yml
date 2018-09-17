@@ -1,0 +1,23 @@
+server:
+  port: 9000
+
+
+spring:
+  datasource:
+#    name: druidDataSource
+#    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://www.sicmed.cn:3306/ehis?characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    username: admin
+    password: 123456
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: mapping/**/*Mapper.xml
+  typeAliasesPackage: com.sicmed.ehis.registration.entity
+
+#logging.level.com.dy.springboot.server.mapper=debug
+logging:
+  level:
+    com.sicmed.ehis.mapper.*: debug
