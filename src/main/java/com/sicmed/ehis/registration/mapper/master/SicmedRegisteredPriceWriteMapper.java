@@ -1,17 +1,18 @@
 package com.sicmed.ehis.registration.mapper.master;
 
+import com.sicmed.ehis.registration.base.BaseWriteMapper;
 import com.sicmed.ehis.registration.entity.SicmedRegisteredPrice;
+import org.springframework.stereotype.Repository;
 
-public interface SicmedRegisteredPriceWriteMapper {
-    int deleteByPrimaryKey(String id);
+@Repository
+public interface SicmedRegisteredPriceWriteMapper extends BaseWriteMapper<SicmedRegisteredPrice>{
 
-    int insert(SicmedRegisteredPrice record);
+    @Override
+    int insertSelective(SicmedRegisteredPrice sicmedRegisteredPrice);
 
-    int insertSelective(SicmedRegisteredPrice record);
+    @Override
+    int updateSelective(SicmedRegisteredPrice sicmedRegisteredPrice);
 
-    SicmedRegisteredPrice selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(SicmedRegisteredPrice record);
-
-    int updateByPrimaryKey(SicmedRegisteredPrice record);
+    @Override
+    int deleteById(String id);
 }

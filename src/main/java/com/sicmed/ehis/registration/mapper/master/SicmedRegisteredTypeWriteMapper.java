@@ -1,17 +1,15 @@
 package com.sicmed.ehis.registration.mapper.master;
 
+import com.sicmed.ehis.registration.base.BaseWriteMapper;
 import com.sicmed.ehis.registration.entity.SicmedRegisteredType;
 
-public interface SicmedRegisteredTypeWriteMapper {
-    int deleteByPrimaryKey(String id);
+public interface SicmedRegisteredTypeWriteMapper  extends BaseWriteMapper<SicmedRegisteredType>{
+    @Override
+    int insertSelective(SicmedRegisteredType sicmedRegisteredType);
 
-    int insert(SicmedRegisteredType record);
+    @Override
+    int updateSelective(SicmedRegisteredType sicmedRegisteredType);
 
-    int insertSelective(SicmedRegisteredType record);
-
-    SicmedRegisteredType selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(SicmedRegisteredType record);
-
-    int updateByPrimaryKey(SicmedRegisteredType record);
+    @Override
+    int deleteById(String id);
 }

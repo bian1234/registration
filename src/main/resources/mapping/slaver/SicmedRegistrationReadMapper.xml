@@ -14,45 +14,4 @@
     from sicmed_registration
     where id = #{id,jdbcType=VARCHAR}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from sicmed_registration
-    where id = #{id,jdbcType=VARCHAR}
-  </delete>
-  <insert id="insert" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistration">
-    insert into sicmed_registration (id, registration_type)
-    values (#{id,jdbcType=VARCHAR}, #{registrationType,jdbcType=VARCHAR})
-  </insert>
-  <insert id="insertSelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistration">
-    insert into sicmed_registration
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        id,
-      </if>
-      <if test="registrationType != null">
-        registration_type,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=VARCHAR},
-      </if>
-      <if test="registrationType != null">
-        #{registrationType,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistration">
-    update sicmed_registration
-    <set>
-      <if test="registrationType != null">
-        registration_type = #{registrationType,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistration">
-    update sicmed_registration
-    set registration_type = #{registrationType,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
 </mapper>

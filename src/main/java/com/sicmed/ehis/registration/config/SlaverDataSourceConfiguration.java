@@ -18,19 +18,19 @@ import javax.sql.DataSource;
  * 读操作数据源
  */
 @Configuration
-@MapperScan(basePackages = "com.prostate.stata.mapper.slaver", sqlSessionTemplateRef  = "slaverSqlSessionTemplate")
+@MapperScan(basePackages = "com.sicmed.ehis.registration.mapper.slaver", sqlSessionTemplateRef  = "slaverSqlSessionTemplate")
 public class SlaverDataSourceConfiguration {
 
-    @Value("${spring.datasource.slaver.driver-class-name}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
-    @Value("${spring.datasource.slaver.url}")
+    @Value("${spring.datasource.url}")
     private String url;
 
-    @Value("${spring.datasource.slaver.username}")
+    @Value("${spring.datasource.username}")
     private String username;
 
-    @Value("${spring.datasource.slaver.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
 
@@ -48,7 +48,7 @@ public class SlaverDataSourceConfiguration {
     public SqlSessionFactory sqlSessionFactory(@Qualifier("slaverDataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
-        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapping/slaver/**/*.xml"));
+        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapping/slaver/*.xml"));
         return bean.getObject();
     }
 

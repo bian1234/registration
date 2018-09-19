@@ -3,9 +3,16 @@ package com.sicmed.ehis.registration;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+
+//@EnableHystrix  //@EnableCircuitBreaker  ==  @EnableHystrix
+//@EnableFeignClients
+//@EnableEurekaServer
+@EnableCaching      // redis缓存
 @SpringBootApplication
-@MapperScan({"com.sicmed.ehis.registration.mapper.master","com.sicmed.ehis.registration.mapper.slaver"})
+@EnableScheduling   //定时器
 public class RegistrationApplication {
 
 	public static void main(String[] args) {

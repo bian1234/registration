@@ -22,7 +22,7 @@
     <result column="del_flag" jdbcType="CHAR" property="delFlag" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, patient_id, branch_id, doctor_id, registration_type, registered_status, registered_price, 
+    id, patient_id, branch_id, doctor_id, registration_type, registered_status, registered_price,
     price_status, registered_begin_date, registered_end_date, create_user, create_date, 
     update_user, update_date, delete_user, delete_date, remarks, del_flag
   </sql>
@@ -30,219 +30,251 @@
     select 
     <include refid="Base_Column_List" />
     from sicmed_registered
-    where id = #{id,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR} AND del_flag = '0'
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from sicmed_registered
-    where id = #{id,jdbcType=VARCHAR}
-  </delete>
-  <insert id="insert" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
-    insert into sicmed_registered (id, patient_id, branch_id, 
-      doctor_id, registration_type, registered_status, 
-      registered_price, price_status, registered_begin_date, 
-      registered_end_date, create_user, create_date, 
-      update_user, update_date, delete_user, 
-      delete_date, remarks, del_flag
-      )
-    values (#{id,jdbcType=VARCHAR}, #{patientId,jdbcType=VARCHAR}, #{branchId,jdbcType=VARCHAR}, 
-      #{doctorId,jdbcType=VARCHAR}, #{registrationType,jdbcType=VARCHAR}, #{registeredStatus,jdbcType=VARCHAR}, 
-      #{registeredPrice,jdbcType=VARCHAR}, #{priceStatus,jdbcType=VARCHAR}, #{registeredBeginDate,jdbcType=TIMESTAMP}, 
-      #{registeredEndDate,jdbcType=TIMESTAMP}, #{createUser,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, 
-      #{updateUser,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, #{deleteUser,jdbcType=VARCHAR}, 
-      #{deleteDate,jdbcType=TIMESTAMP}, #{remarks,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR}
-      )
-  </insert>
-  <insert id="insertSelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
-    insert into sicmed_registered
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        id,
+
+
+  
+  <select id="selectByParams"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      <if test="id != null and id != ''">
+        AND id = #{id,jdbcType=VARCHAR}
       </if>
-      <if test="patientId != null">
-        patient_id,
+      <if test="patientId != null and patientId != ''">
+        AND patient_id = #{patientId,jdbcType=VARCHAR}
       </if>
-      <if test="branchId != null">
-        branch_id,
+      <if test="branchId != null and branchId != ''">
+        AND branch_id = #{branchId,jdbcType=VARCHAR}
       </if>
-      <if test="doctorId != null">
-        doctor_id,
+      <if test="doctorId != null and doctorId != ''">
+        AND doctor_id = #{doctorId,jdbcType=VARCHAR}
       </if>
-      <if test="registrationType != null">
-        registration_type,
+      <if test="registrationType != null and registrationType != ''">
+        AND registration_type = #{registrationType,jdbcType=VARCHAR}
       </if>
-      <if test="registeredStatus != null">
-        registered_status,
+      <if test="registeredStatus != null and registeredStatus != ''">
+        AND registered_status = #{registeredStatus,jdbcType=VARCHAR}
       </if>
-      <if test="registeredPrice != null">
-        registered_price,
+      <if test="registeredPrice != null and registeredPrice != ''">
+        AND registered_price = #{registeredPrice,jdbcType=VARCHAR}
       </if>
-      <if test="priceStatus != null">
-        price_status,
+      <if test="priceStatus != null and priceStatus != ''">
+        AND price_status = #{priceStatus,jdbcType=VARCHAR}
       </if>
-      <if test="registeredBeginDate != null">
-        registered_begin_date,
+      <if test="registeredBeginDate != null ">
+        AND registered_begin_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="registeredEndDate != null">
-        registered_end_date,
+      <if test="registeredEndDate != null ">
+        AND ( registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP}
+        OR registered_end_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP})
       </if>
-      <if test="createUser != null">
-        create_user,
+      <if test="createUser != null and createUser != ''">
+        AND create_user = #{createUser,jdbcType=VARCHAR}
       </if>
-      <if test="createDate != null">
-        create_date,
+      <if test="createDate != null and createDate != ''">
+        AND create_date = #{createDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="updateUser != null">
-        update_user,
+      <if test="updateUser != null and updateUser != ''">
+        AND update_user = #{updateUser,jdbcType=VARCHAR}
       </if>
-      <if test="updateDate != null">
-        update_date,
+      <if test="updateDate != null and updateDate != ''">
+        AND update_date = #{updateDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="deleteUser != null">
-        delete_user,
+      <if test="deleteUser != null and deleteUser != ''">
+        AND delete_user = #{deleteUser,jdbcType=VARCHAR}
       </if>
-      <if test="deleteDate != null">
-        delete_date,
+      <if test="deleteDate != null and deleteDate != ''">
+        AND delete_date = #{deleteDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="remarks != null">
-        remarks,
+      <if test="remarks != null and remarks != ''">
+        AND remarks = #{remarks,jdbcType=VARCHAR}
       </if>
-      <if test="delFlag != null">
-        del_flag,
+      <if test="delFlag != null and delFlag != ''">
+        AND del_flag = #{delFlag,jdbcType=CHAR}
       </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=VARCHAR},
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+      <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+
+  <!--代缴费-->
+  <select id="patientNotPay"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      del_flag = '0'
+        AND registered_status IN ('0','1')
+      <if test="priceStatus != null and priceStatus != ''">
+        AND price_status = #{priceStatus,jdbcType=VARCHAR}
       </if>
-      <if test="patientId != null">
-        #{patientId,jdbcType=VARCHAR},
+      <if test="registeredBeginDate != null ">
+        AND registered_begin_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="branchId != null">
-        #{branchId,jdbcType=VARCHAR},
+      <if test="registeredEndDate != null ">
+        AND registered_end_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
+        OR registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="doctorId != null">
-        #{doctorId,jdbcType=VARCHAR},
+
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+    <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+
+  <!--可以退号的患者-->
+  <select id="selectByParams2"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      <if test="id != null and id != ''">
+        AND id = #{id,jdbcType=VARCHAR}
       </if>
-      <if test="registrationType != null">
-        #{registrationType,jdbcType=VARCHAR},
+      <if test="patientId != null and patientId != ''">
+        AND patient_id = #{patientId,jdbcType=VARCHAR}
       </if>
-      <if test="registeredStatus != null">
-        #{registeredStatus,jdbcType=VARCHAR},
+      <if test="branchId != null and branchId != ''">
+        AND branch_id = #{branchId,jdbcType=VARCHAR}
       </if>
-      <if test="registeredPrice != null">
-        #{registeredPrice,jdbcType=VARCHAR},
+      <if test="doctorId != null and doctorId != ''">
+        AND doctor_id = #{doctorId,jdbcType=VARCHAR}
       </if>
-      <if test="priceStatus != null">
-        #{priceStatus,jdbcType=VARCHAR},
+      <if test="registrationType != null and registrationType != ''">
+        AND registration_type = #{registrationType,jdbcType=VARCHAR}
       </if>
-      <if test="registeredBeginDate != null">
-        #{registeredBeginDate,jdbcType=TIMESTAMP},
+        AND registered_status IN ('0','1')
+      <if test="registeredPrice != null and registeredPrice != ''">
+        AND registered_price = #{registeredPrice,jdbcType=VARCHAR}
       </if>
-      <if test="registeredEndDate != null">
-        #{registeredEndDate,jdbcType=TIMESTAMP},
+      <if test="priceStatus != null and priceStatus != ''">
+        AND price_status = #{priceStatus,jdbcType=VARCHAR}
       </if>
-      <if test="createUser != null">
-        #{createUser,jdbcType=VARCHAR},
+      <if test="registeredBeginDate != null and registeredBeginDate != ''">
+        AND registered_begin_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="createDate != null">
-        #{createDate,jdbcType=TIMESTAMP},
+      <if test="registeredEndDate != null and registeredEndDate != ''">
+        AND registered_end_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="updateUser != null">
-        #{updateUser,jdbcType=VARCHAR},
+      <if test="createUser != null and createUser != ''">
+        AND create_user = #{createUser,jdbcType=VARCHAR}
       </if>
-      <if test="updateDate != null">
-        #{updateDate,jdbcType=TIMESTAMP},
+      <if test="createDate != null and createDate != ''">
+        AND create_date = #{createDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="deleteUser != null">
-        #{deleteUser,jdbcType=VARCHAR},
+      <if test="updateUser != null and updateUser != ''">
+        AND update_user = #{updateUser,jdbcType=VARCHAR}
       </if>
-      <if test="deleteDate != null">
-        #{deleteDate,jdbcType=TIMESTAMP},
+      <if test="updateDate != null and updateDate != ''">
+        AND update_date = #{updateDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="remarks != null">
-        #{remarks,jdbcType=VARCHAR},
+      <if test="deleteUser != null and deleteUser != ''">
+        AND delete_user = #{deleteUser,jdbcType=VARCHAR}
       </if>
-      <if test="delFlag != null">
-        #{delFlag,jdbcType=CHAR},
+      <if test="deleteDate != null and deleteDate != ''">
+        AND delete_date = #{deleteDate,jdbcType=TIMESTAMP}
       </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
-    update sicmed_registered
-    <set>
-      <if test="patientId != null">
-        patient_id = #{patientId,jdbcType=VARCHAR},
+      <if test="remarks != null and remarks != ''">
+        AND remarks = #{remarks,jdbcType=VARCHAR}
       </if>
-      <if test="branchId != null">
-        branch_id = #{branchId,jdbcType=VARCHAR},
+      <if test="delFlag != null and delFlag != ''">
+        AND del_flag = #{delFlag,jdbcType=CHAR}
       </if>
-      <if test="doctorId != null">
-        doctor_id = #{doctorId,jdbcType=VARCHAR},
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+    <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+
+  <!--查询挂号记录-->
+  <select id="registerRecord"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      del_flag = '0'
+      <if test="registeredStatus != null and registeredStatus != ''">
+        AND registered_status = #{registeredStatus,jdbcType=VARCHAR}
       </if>
-      <if test="registrationType != null">
-        registration_type = #{registrationType,jdbcType=VARCHAR},
+      <if test="registeredBeginDate != null ">
+        AND create_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="registeredStatus != null">
-        registered_status = #{registeredStatus,jdbcType=VARCHAR},
+      <if test="registeredEndDate != null ">
+        AND create_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="registeredPrice != null">
-        registered_price = #{registeredPrice,jdbcType=VARCHAR},
+      <if test="createUser != null and createUser != ''">
+        AND create_user = #{createUser,jdbcType=VARCHAR}
       </if>
-      <if test="priceStatus != null">
-        price_status = #{priceStatus,jdbcType=VARCHAR},
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+    <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+  <!--查询改号记录-->
+  <select id="exchangeRecord"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      del_flag = '0'
+      <if test="registeredStatus != null and registeredStatus != ''">
+        AND registered_status = #{registeredStatus,jdbcType=VARCHAR}
       </if>
-      <if test="registeredBeginDate != null">
-        registered_begin_date = #{registeredBeginDate,jdbcType=TIMESTAMP},
+      <if test="registeredBeginDate != null ">
+        AND update_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="registeredEndDate != null">
-        registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP},
+      <if test="registeredEndDate != null ">
+        AND update_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="createUser != null">
-        create_user = #{createUser,jdbcType=VARCHAR},
+      <if test="createUser != null and createUser != ''">
+        AND update_user = #{createUser,jdbcType=VARCHAR}
       </if>
-      <if test="createDate != null">
-        create_date = #{createDate,jdbcType=TIMESTAMP},
+
+
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+    <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+  <!--退号记录-->
+  <select id="returnRecord"  resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM sicmed_registered
+    <where>
+      del_flag = '0'
+      <if test="registeredStatus != null and registeredStatus != ''">
+        AND registered_status = #{registeredStatus,jdbcType=VARCHAR}
       </if>
-      <if test="updateUser != null">
-        update_user = #{updateUser,jdbcType=VARCHAR},
+      <if test="registeredBeginDate != null ">
+        AND delete_date > #{registeredBeginDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="updateDate != null">
-        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      <if test="registeredEndDate != null ">
+        AND delete_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
-      <if test="deleteUser != null">
-        delete_user = #{deleteUser,jdbcType=VARCHAR},
+      <if test="deleteUser != null and deleteUser != ''">
+        AND delete_user = #{deleteUser,jdbcType=VARCHAR}
       </if>
-      <if test="deleteDate != null">
-        delete_date = #{deleteDate,jdbcType=TIMESTAMP},
-      </if>
-      <if test="remarks != null">
-        remarks = #{remarks,jdbcType=VARCHAR},
-      </if>
-      <if test="delFlag != null">
-        del_flag = #{delFlag,jdbcType=CHAR},
-      </if>
-    </set>
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
-    update sicmed_registered
-    set patient_id = #{patientId,jdbcType=VARCHAR},
-      branch_id = #{branchId,jdbcType=VARCHAR},
-      doctor_id = #{doctorId,jdbcType=VARCHAR},
-      registration_type = #{registrationType,jdbcType=VARCHAR},
-      registered_status = #{registeredStatus,jdbcType=VARCHAR},
-      registered_price = #{registeredPrice,jdbcType=VARCHAR},
-      price_status = #{priceStatus,jdbcType=VARCHAR},
-      registered_begin_date = #{registeredBeginDate,jdbcType=TIMESTAMP},
-      registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP},
-      create_user = #{createUser,jdbcType=VARCHAR},
-      create_date = #{createDate,jdbcType=TIMESTAMP},
-      update_user = #{updateUser,jdbcType=VARCHAR},
-      update_date = #{updateDate,jdbcType=TIMESTAMP},
-      delete_user = #{deleteUser,jdbcType=VARCHAR},
-      delete_date = #{deleteDate,jdbcType=TIMESTAMP},
-      remarks = #{remarks,jdbcType=VARCHAR},
-      del_flag = #{delFlag,jdbcType=CHAR}
-    where id = #{id,jdbcType=VARCHAR}
-  </update>
+    </where>
+    ORDER BY create_date
+
+    <!--<if test="query != null and query != null">-->
+    <!--limit #{query.offset}, #{query.limit}-->
+    <!--</if>-->
+  </select>
+
 </mapper>

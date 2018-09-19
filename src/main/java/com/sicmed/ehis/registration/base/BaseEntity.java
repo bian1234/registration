@@ -3,23 +3,23 @@ package com.sicmed.ehis.registration.base;
 public class BaseEntity {
 
     public final static int PAGE_SIZE = 100;
-    public int pageSize;
+    public int offset;   //页码
 
-    public int pageNo;
+    public int limit;    //每页数据量
 
-    public int getPageSize() {
-        return pageSize;
+    public int getOffset() {
+        return offset;
     }
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
-    public int getPageNo() {
-        return pageNo;
+    public int getLimit() {
+        return limit;
     }
 
-    public void setPageNo(int pageNo) {
-        this.pageNo = pageNo;
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 }

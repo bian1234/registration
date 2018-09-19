@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sicmed.ehis.registration.mapper.master.SicmedRegisteredTypeWriteMapper">
+<mapper namespace="com.sicmed.ehis.registration.mapper.master.SicmedRegisteredWriteMapper">
+
   <resultMap id="BaseResultMap" type="com.sicmed.ehis.registration.entity.SicmedRegistered">
     <id column="id" jdbcType="VARCHAR" property="id" />
     <result column="patient_id" jdbcType="VARCHAR" property="patientId" />
@@ -26,12 +27,6 @@
     price_status, registered_begin_date, registered_end_date, create_user, create_date, 
     update_user, update_date, delete_user, delete_date, remarks, del_flag
   </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
-    from sicmed_registered
-    where id = #{id,jdbcType=VARCHAR}
-  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from sicmed_registered
     where id = #{id,jdbcType=VARCHAR}
@@ -53,6 +48,9 @@
       )
   </insert>
   <insert id="insertSelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
+    <selectKey keyProperty="id" resultType="string" order="BEFORE">
+      select replace(uuid(), '-', '') as id from dual
+    </selectKey>
     insert into sicmed_registered
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -167,7 +165,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
+  <update id="updateSelective" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
     update sicmed_registered
     <set>
       <if test="patientId != null">

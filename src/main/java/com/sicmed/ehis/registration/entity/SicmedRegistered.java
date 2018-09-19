@@ -1,8 +1,10 @@
 package com.sicmed.ehis.registration.entity;
 
+import com.sicmed.ehis.registration.base.BaseEntity;
+
 import java.util.Date;
 
-public class SicmedRegistered {
+public class SicmedRegistered extends BaseEntity{
     private String id;
 
     private String patientId;
@@ -181,5 +183,29 @@ public class SicmedRegistered {
 
     public void setDelFlag(String delFlag) {
         this.delFlag = delFlag == null ? null : delFlag.trim();
+    }
+
+    @Override
+    public String toString() {
+        return "SicmedRegistered{" +
+                "id='" + id + '\'' +
+                ", patientId='" + patientId + '\'' +
+                ", branchId='" + branchId + '\'' +
+                ", doctorId='" + doctorId + '\'' +
+                ", registrationType='" + registrationType + '\'' +
+                ", registeredStatus='" + registeredStatus + '\'' +
+                ", registeredPrice='" + registeredPrice + '\'' +
+                ", priceStatus='" + priceStatus + '\'' +
+                ", registeredBeginDate=" + registeredBeginDate +
+                ", registeredEndDate=" + registeredEndDate +
+                ", createUser='" + createUser + '\'' +
+                ", createDate=" + createDate +
+                ", updateUser='" + updateUser + '\'' +
+                ", updateDate=" + updateDate +
+                ", deleteUser='" + deleteUser + '\'' +
+                ", deleteDate=" + deleteDate +
+                ", remarks='" + remarks + '\'' +
+                ", delFlag='" + delFlag + '\'' +
+                '}';
     }
 }

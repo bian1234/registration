@@ -1,18 +1,23 @@
-package com.sicmed.ehis.registration.mapper.slaver;
+package com.sicmed.ehis.registration.service;
 
-import com.sicmed.ehis.registration.base.BaseReadMapper;
+import com.sicmed.ehis.registration.base.BaseService;
 import com.sicmed.ehis.registration.entity.SicmedRegistered;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-public interface SicmedRegisteredReadMapper extends BaseReadMapper<SicmedRegistered>{
+/**
+ * @Author: ykbian
+ * @Date: 2018/9/18 9:39
+ * @Todo:  患者挂号服务
+ */
 
+public interface SicmedRegisteredService  extends BaseService<SicmedRegistered> {
 
-    SicmedRegistered selectByPrimaryKey(String id);
+    @Override
+    int insertSelective(SicmedRegistered sicmedRegistered);
 
-
+    @Override
+    int updateSelective(SicmedRegistered sicmedRegistered);
 
     @Override
     SicmedRegistered selectById(String id);
@@ -20,9 +25,8 @@ public interface SicmedRegisteredReadMapper extends BaseReadMapper<SicmedRegiste
     @Override
     List<SicmedRegistered> selectByParams(SicmedRegistered sicmedRegistered);
 
-
     /**
-     *  可以退号的患者（包含正常挂号合已经改号的患者）
+     *  可以退号的患者
      */
     List<SicmedRegistered> selectByParams2(SicmedRegistered sicmedRegistered);
 
@@ -41,8 +45,11 @@ public interface SicmedRegisteredReadMapper extends BaseReadMapper<SicmedRegiste
      */
     List<SicmedRegistered> returnRecord(SicmedRegistered sicmedRegistered);
 
+    @Override
+    int deleteById(String id);
+
     /**
-     *  所有的待缴费
+     *  所有的代缴费
      */
     List<SicmedRegistered> patientNotPay(SicmedRegistered sicmedRegistered);
 }

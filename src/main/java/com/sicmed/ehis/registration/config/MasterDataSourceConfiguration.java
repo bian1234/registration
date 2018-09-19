@@ -19,19 +19,19 @@ import javax.sql.DataSource;
  * 写操作 数据源
  */
 @Configuration
-@MapperScan(basePackages = "com.prostate.stata.mapper.master", sqlSessionTemplateRef  = "masterSqlSessionTemplate")
+@MapperScan(basePackages = "com.sicmed.ehis.registration.mapper.master", sqlSessionTemplateRef  = "masterSqlSessionTemplate")
 public class MasterDataSourceConfiguration {
 
-    @Value("${spring.datasource.master.driver-class-name}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
-    @Value("${spring.datasource.master.url}")
+    @Value("${spring.datasource.url}")
     private String url;
 
-    @Value("${spring.datasource.master.username}")
+    @Value("${spring.datasource.username}")
     private String username;
 
-    @Value("${spring.datasource.master.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
     @Bean(name = "masterDataSource")
@@ -50,7 +50,7 @@ public class MasterDataSourceConfiguration {
     public SqlSessionFactory sqlSessionFactory(@Qualifier("masterDataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
-        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapping/master/**/*.xml"));
+        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapping/master/*.xml"));
         return bean.getObject();
     }
 

@@ -1,17 +1,14 @@
 package com.sicmed.ehis.registration.mapper.slaver;
 
+import com.sicmed.ehis.registration.base.BaseReadMapper;
 import com.sicmed.ehis.registration.entity.SicmedRegisteredPrice;
 
-public interface SicmedRegisteredPriceReadMapper {
-    int deleteByPrimaryKey(String id);
+import java.util.List;
 
-    int insert(SicmedRegisteredPrice record);
+public interface SicmedRegisteredPriceReadMapper extends BaseReadMapper<SicmedRegisteredPrice>{
+    @Override
+    SicmedRegisteredPrice selectById(String id);
 
-    int insertSelective(SicmedRegisteredPrice record);
-
-    SicmedRegisteredPrice selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(SicmedRegisteredPrice record);
-
-    int updateByPrimaryKey(SicmedRegisteredPrice record);
+    @Override
+    List<SicmedRegisteredPrice> selectByParams(SicmedRegisteredPrice sicmedRegisteredPrice);
 }

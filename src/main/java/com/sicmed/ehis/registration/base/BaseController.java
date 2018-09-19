@@ -31,6 +31,8 @@ public class BaseController {
     protected String getToken() {
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest();
         String token = request.getHeader("token");
+        //临时加的当前登录用户信息，最终用户信息要从请求中获取
+        token = "378c20bcbb0311e89c1500163e000a60";
         return token;
     }
 
