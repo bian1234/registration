@@ -1,9 +1,12 @@
 package com.sicmed.ehis.registration.controller;
 
 import com.sicmed.ehis.registration.base.BaseController;
+import com.sicmed.ehis.registration.cache.redis.RedisSerive;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * @Author: ykbian
  * @Date: 2018/9/19 11:35
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Controller;
 public class SicmedRegisteredSourceController  extends BaseController {
 
 
+   @Autowired
+   private RedisSerive redisSerive;
     /**
      *@Author:      ykbian
      *@date_time:   2018/9/19 11:36
@@ -25,6 +30,18 @@ public class SicmedRegisteredSourceController  extends BaseController {
 
     }
 
+    @ResponseBody
+   @GetMapping("test")
+    public void test(){
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        String key1 = "9fb88335bc7d11e89c1500163e000a60"+"f8f0062041cb47508a2ff2d33fc94fe5";
+        int v1 = 3;
+        String key2 = "ce23fae5bbd611e89c1500163e000a60"+"f8f0062041cb47508a2ff2d33fc94fe5";
+        int v2 = 3;
+        redisSerive.set(key2,v2);
+        redisSerive.set(key1,v1);
+        System.out.println("================================================");
 
+    }
 
 }

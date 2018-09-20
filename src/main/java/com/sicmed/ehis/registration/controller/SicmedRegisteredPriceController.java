@@ -3,12 +3,15 @@ package com.sicmed.ehis.registration.controller;
 import com.sicmed.ehis.registration.base.BaseController;
 import com.sicmed.ehis.registration.base.Constant;
 import com.sicmed.ehis.registration.base.util.AppParameterSimulation;
+import com.sicmed.ehis.registration.bean.CountBean;
 import com.sicmed.ehis.registration.bean.RegisteredBean;
+import com.sicmed.ehis.registration.entity.GroupID;
 import com.sicmed.ehis.registration.entity.SicmedPatient;
 import com.sicmed.ehis.registration.entity.SicmedRegistered;
 import com.sicmed.ehis.registration.service.SicmedRegisteredService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,10 +50,10 @@ public class SicmedRegisteredPriceController extends BaseController{
     */
     @ResponseBody
     @PostMapping("patientPay")
-    public Map patientPay(String registeredId){
+    public Map patientPay(@Validated(GroupID.class)RegisteredBean registeredBean){
         //修改患者的缴费状态为已经缴费
-        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredId);
-        if (registeredId == null){
+        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredBean.getId());
+        if (sicmedRegistered == null){
             return updateFailedResponse();
         }
         sicmedRegistered.setPriceStatus(Constant.PRICE_EXCHARGE);
@@ -70,9 +73,9 @@ public class SicmedRegisteredPriceController extends BaseController{
     */
     @ResponseBody
     @PostMapping("patientRefund")
-    public Map patientRefund(String registeredId){
+    public Map patientRefund(@Validated(GroupID.class) RegisteredBean registeredBean){
         //修改患者的缴费状态为退费
-        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredId);
+        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredBean.getId());
         if (sicmedRegistered == null){
             return queryEmptyResponse();
         }
@@ -155,7 +158,6 @@ public class SicmedRegisteredPriceController extends BaseController{
         List<RegisteredBean> registeredBeans = new ArrayList<>();
         //创建一个查询对象
         SicmedRegistered sicmedRegistered = new SicmedRegistered();
-
         //如果查询时间为空号的话，则默认查询当天的数据
         // 如果前端的起始时间不为空，则按照前端的起始时间查询
         Date startDate = DateTimeUtil.getDayBeginDate();
@@ -206,60 +208,67 @@ public class SicmedRegisteredPriceController extends BaseController{
      *@Description:  查询缴费（退费）记录
      *@param:
     */
-//    @ResponseBody
-//    @GetMapping("priceRecord")
-//    public Map priceRecord(String status,String beginTime, String endTime){
-//        //创建一个返回对象
-//        List<RegisteredBean> registeredBeans = new ArrayList<>();
-//        //创建一个查询对象
-//        SicmedRegistered sicmedRegistered = new SicmedRegistered();
-//
-//        //如果查询时间为空号的话，则默认查询当天的数据
-//        // 如果前端的起始时间不为空，则按照前端的起始时间查询
-//        Date startDate = DateTimeUtil.getDayBeginDate();
-//        Date endDate1 = DateTimeUtil.getDayEndDate();
-//        if(beginTime != "" && beginTime !=null){
-//            startDate = DateTimeUtil.getDate(beginTime);
-//        }
-//        // 截止时间不为空的话  按照前端的时间进行查询
-//        if(!AppParameterSimulation.isEmpty(endTime)){
-//            endDate1 = DateTimeUtil.getDate(endTime);
-//        }
-//        sicmedRegistered.setRegisteredBeginDate(startDate);
-//        sicmedRegistered.setRegisteredEndDate(endDate1);
-//        sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
-//        //根据status判断要进行的操作
-//        //缴费记录
-//        if (status.equals(Constant.PRICE_EXCHARGE)){
-//
-//        }else if (status.equals(Constant.PRICE_RETURN)){
-//
-//        }else
-//        List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.patientNotPay(sicmedRegistered);
-//        if (sicmedRegistereds == null){
-//            return queryEmptyResponse();
-//        }
-//        for (SicmedRegistered registered:sicmedRegistereds) {
-//            RegisteredBean registeredBean = new RegisteredBean();
-//            SicmedPatient sicmedPatient = sicmedPatientService.selectById(registered.getPatientId());
-//            /**
-//             *  此处的医生id和科室id可以直接替换成具体的信息
-//             */
-//            //患者个人信息部分
-//            registeredBean.setPatientSex(sicmedPatient.getPatientSex());
-//            registeredBean.setPatientAge(sicmedPatient.getPatientAge());
-//            registeredBean.setPatientNumber(sicmedPatient.getPatientNumber());
-//            registeredBean.setPatientName(sicmedPatient.getPatientName());
-//            registeredBean.setPatientCard(sicmedPatient.getPatientCard());
-//            registeredBean.setPatientAddress(sicmedPatient.getPatientAddress());
-//            // 挂号信息部分
-//            registeredBean.setId(registered.getId());
-//            registeredBean.setBranchId(registered.getBranchId());
-//            registeredBean.setDoctorId(registered.getDoctorId());
-//            registeredBean.setRegisteredTypeId(registered.getRegistrationType());
-//            registeredBean.setRegisteredPrice(registered.getRegisteredPrice());
-//            registeredBeans.add(registeredBean);
-//        }
-//        return querySuccessResponse(registeredBeans);
-//    }
+    @ResponseBody
+    @GetMapping("priceRecord")
+    public Map priceRecord(String status,String beginTime, String endTime){
+        //创建一个返回对象(带统计属性)
+        CountBean countBean = new CountBean();
+        List<RegisteredBean> registeredBeans = new ArrayList<>();
+        double money = 0.00;
+        // 判断查询条件
+        //创建一个查询对象
+        SicmedRegistered sicmedRegistered = new SicmedRegistered();
+        //如果查询时间为空号的话，则默认查询当天的数据
+        // 如果前端的起始时间不为空，则按照前端的起始时间查询
+        Date startDate = DateTimeUtil.getDayBeginDate();
+        Date endDate1 = DateTimeUtil.getDayEndDate();
+        if(beginTime != "" && beginTime !=null){
+            startDate = DateTimeUtil.getDate(beginTime);
+        }
+        // 截止时间不为空的话  按照前端的时间进行查询
+        if(!AppParameterSimulation.isEmpty(endTime)){
+            endDate1 = DateTimeUtil.getDate(endTime);
+        }
+        sicmedRegistered.setRegisteredBeginDate(startDate);
+        sicmedRegistered.setRegisteredEndDate(endDate1);
+        // 查询缴费信息
+        if (status.equals(Constant.PRICE_EXCHARGE)){
+            sicmedRegistered.setPriceStatus(status);
+        }else if (status.equals(Constant.PRICE_RETURN)){
+            sicmedRegistered.setPriceStatus(status);
+        }else {
+            return queryEmptyResponse();
+        }
+        sicmedRegistered.setRegisteredBeginDate(startDate);
+        sicmedRegistered.setRegisteredEndDate(endDate1);
+        List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.selectByParams(sicmedRegistered);
+        if (sicmedRegistereds == null){
+            return queryEmptyResponse();
+        }
+        for (SicmedRegistered registered:sicmedRegistereds) {
+            RegisteredBean registeredBean = new RegisteredBean();
+            SicmedPatient sicmedPatient = sicmedPatientService.selectById(registered.getPatientId());
+            //患者个人信息部分
+            registeredBean.setPatientSex(sicmedPatient.getPatientSex());
+            registeredBean.setPatientAge(sicmedPatient.getPatientAge());
+            registeredBean.setPatientNumber(sicmedPatient.getPatientNumber());
+            registeredBean.setPatientName(sicmedPatient.getPatientName());
+            registeredBean.setPatientCard(sicmedPatient.getPatientCard());
+            registeredBean.setPatientAddress(sicmedPatient.getPatientAddress());
+            // 挂号信息部分
+            registeredBean.setId(registered.getId());
+            registeredBean.setBranchId(registered.getBranchId());
+            registeredBean.setDoctorId(registered.getDoctorId());
+            registeredBean.setRegisteredTypeId(registered.getRegistrationType());
+            registeredBean.setRegisteredPrice(registered.getRegisteredPrice());
+
+            // 累计金额
+            money = Double.parseDouble(registered.getRegisteredPrice())+money;
+            registeredBeans.add(registeredBean);
+        }
+        countBean.setRegisteredBeans(registeredBeans);
+        countBean.setTotalPeople(sicmedRegistereds.size()+"");
+        countBean.setTotalMoney(money+"");
+        return querySuccessResponse(countBean);
+    }
 }

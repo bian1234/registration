@@ -52,4 +52,8 @@ public interface SicmedRegisteredService  extends BaseService<SicmedRegistered> 
      *  所有的代缴费
      */
     List<SicmedRegistered> patientNotPay(SicmedRegistered sicmedRegistered);
+
+    /**
+     *   统计挂号
+     */
 }

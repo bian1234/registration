@@ -3,10 +3,10 @@ package com.sicmed.ehis.registration.controller;
 import com.sicmed.ehis.registration.base.BaseController;
 import com.sicmed.ehis.registration.base.Constant;
 import com.sicmed.ehis.registration.base.util.AppParameterSimulation;
+import com.sicmed.ehis.registration.bean.CountBean;
 import com.sicmed.ehis.registration.bean.RegisteredBean;
-import com.sicmed.ehis.registration.entity.SicmedNum;
-import com.sicmed.ehis.registration.entity.SicmedPatient;
-import com.sicmed.ehis.registration.entity.SicmedRegistered;
+import com.sicmed.ehis.registration.cache.redis.RedisSerive;
+import com.sicmed.ehis.registration.entity.*;
 import com.sicmed.ehis.registration.service.SicmedNumService;
 import com.sicmed.ehis.registration.service.SicmedPatientService;
 import com.sicmed.ehis.registration.service.SicmedRegisteredService;
@@ -14,12 +14,13 @@ import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import com.sicmed.ehis.registration.base.util.DateTimeUtil;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,11 +45,8 @@ public class SicmedRegisteredController  extends BaseController {
     @Autowired
     private SicmedNumService sicmedNumService;
 
-    /**
-     *  这是假数据，以后从缓存中获取
-     */
-    private static  int pediatricResidue = 5;   //儿科
-    private static  int surgicalResidue = 5;   //外科
+    @Autowired
+    private RedisSerive redisSerive;
 
     /**
      *@Author:      ykbian
@@ -58,17 +56,21 @@ public class SicmedRegisteredController  extends BaseController {
     */
     @ResponseBody
     @PostMapping("insert")
-    public Map insert(RegisteredBean registeredBean){
-
-        /**
-         *  根据科室和医生信息查询号源余量，没号的话直接返回
-         */
+    public Map insert(@Validated(GroupWithoutId.class) RegisteredBean registeredBean){
+        //号源不足的话直接返回
+        //redis中的key是科室id+医生信息id
+        String key = registeredBean.getBranchId()+registeredBean.getDoctorId();
+        int value = redisSerive.get(key);
+        if ( value< 1){
+            logger.info("挂号，但是号源不足");
+            return insertFailedResponse();
+        }
         //根据身份证号码查询患者信息，没有的话创建患者
         /**
          *   此处有bug  关于身份证号的
          */
         SicmedPatient sicmedPatient = sicmedPatientService.selectByCard(registeredBean.getPatientCard());
-        String patientId = null;
+        String patientId ;
         if (sicmedPatient != null){
             patientId = sicmedPatient.getId();
         }else {
@@ -138,9 +140,8 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setRegisteredBeginDate(new Date());
         sicmedRegistered.setRegisteredEndDate(DateTimeUtil.getCureEndDate());
         if (sicmedRegisteredService.insertSelective(sicmedRegistered) > 0){
-            /**
-             *  相对应的科室号院减一
-             */
+            // 号源信息减一
+            redisSerive.set(key,value-1);
             return insertSuccseeResponse();
         }
         return insertFailedResponse();
@@ -155,18 +156,38 @@ public class SicmedRegisteredController  extends BaseController {
     */
     @ResponseBody
     @PostMapping("registeredChange")
-    public Map registeredChange(SicmedRegistered sicmedRegistered){
+    public Map registeredChange(@Validated({GroupWithoutId.class, GroupID.class}) RegisteredBean registeredBean){
         /**
          *  从缓存中查询剩余号源数量 ，如果号源数量不足，则改号失败
          */
+        String key = registeredBean.getBranchId()+registeredBean.getDoctorId();
+        int value = redisSerive.get(key);
+        if ( value< 1){
+            logger.info("改号，号源不足！");
+            return insertFailedResponse();
+        }
+//         将信息的挂号信息赋值给原来的挂号数据
+//        这里只能是从数据库中根据原来的id查询信息，直接new对象的话会丢失信息
+        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredBean.getId());
+        //号源信息数据key
+        String key1 = sicmedRegistered.getBranchId()+sicmedRegistered.getDoctorId();
+        sicmedRegistered.setBranchId(registeredBean.getBranchId());
+        sicmedRegistered.setDoctorId(registeredBean.getDoctorId());
+        sicmedRegistered.setRegisteredPrice(registeredBean.getRegisteredPrice());
+        sicmedRegistered.setRegistrationType(registeredBean.getRegisteredTypeId());
 
-       // 改变挂号信息中的科室信息
         sicmedRegistered.setUpdateDate(new Date());
         sicmedRegistered.setUpdateUser(getToken());
+        sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_EXCHANGE);
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0){
+           //根据id找到之前的科室信息和医生信息
+            int value1 = redisSerive.get(key1);
+
             /**
-             *  相应的号源信息加一 和 减一
+             *  新的科室号源减一  之前的科室号源加一
              */
+            redisSerive.set(key,value-1);
+            redisSerive.set(key1,value1+1);
             return updateSuccseeResponse();
         }
         return updateFailedResponse();
@@ -182,9 +203,10 @@ public class SicmedRegisteredController  extends BaseController {
     */
     @ResponseBody
     @PostMapping("registeredRefund")
-    public Map registeredRefund(String registeredId){
+    public Map registeredRefund(@Validated(GroupID.class) RegisteredBean registeredBean){
+
         // 改变挂号信息中的挂号状态，
-        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredId);
+        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredBean.getId());
         //找不到这个挂号信息的话直接返回
         if (sicmedRegistered == null){
            return deleteFailedResponse();
@@ -197,6 +219,10 @@ public class SicmedRegisteredController  extends BaseController {
             /**
              *   退出的号源信息加一
              */
+            String key = sicmedRegistered.getBranchId()+sicmedRegistered.getDoctorId();
+            int value = redisSerive.get(key);
+            redisSerive.set(key,value+1);
+            logger.info("患者退号");
             return deleteSuccseeResponse();
         }
         return deleteFailedResponse();
@@ -207,7 +233,7 @@ public class SicmedRegisteredController  extends BaseController {
     /**
      *@Author:      ykbian
      *@date_time:   2018/9/18 10:28
-     *@Description: 可以改号的患者列表(正常挂号的患者)
+     *@Description: 可以改号的患者列表
      *@param:
     */
     @ResponseBody
@@ -241,7 +267,7 @@ public class SicmedRegisteredController  extends BaseController {
     /**
      *@Author:      ykbian
      *@date_time:   2018/9/18 10:31
-     *@Description: 可以退号的患者列表（正常挂号和改号的患者）
+     *@Description: 可以退号的患者列表
      *@param:
     */
     @ResponseBody
@@ -321,13 +347,53 @@ public class SicmedRegisteredController  extends BaseController {
 
     /**
      *@Author:      ykbian
+     *@date_time:   2018/9/20 11:23
+     *@Description: 根据id查询挂号信息
+     *@param:
+     */
+    @ResponseBody
+    @GetMapping("selectById")
+    public Map selectById(String registeredId){
+        RegisteredBean registeredBean = new RegisteredBean();
+        SicmedRegistered sicmedRegistered = sicmedRegisteredService.selectById(registeredId);
+        if (sicmedRegistered == null){
+            return queryEmptyResponse();
+        }
+        SicmedPatient sicmedPatient = sicmedPatientService.selectById(sicmedRegistered.getPatientId());
+        // 挂号信息
+        registeredBean.setRegisteredPrice(sicmedRegistered.getRegisteredPrice());
+        registeredBean.setRegisteredTypeId(sicmedRegistered.getRegistrationType());
+        registeredBean.setRegisteredStatus(sicmedRegistered.getRegisteredStatus());
+        registeredBean.setId(sicmedRegistered.getId());
+        registeredBean.setDoctorId(sicmedRegistered.getDoctorId());
+        registeredBean.setBranchId(sicmedRegistered.getBranchId());
+
+        //患者个人信息部分
+        registeredBean.setPatientAddress(sicmedPatient.getPatientAddress());
+        registeredBean.setPatientCard(sicmedPatient.getPatientCard());
+        registeredBean.setPatientSex(sicmedPatient.getPatientSex());
+        registeredBean.setPatientAge(sicmedPatient.getPatientAge());
+        registeredBean.setPatientTel(sicmedPatient.getPatientTel());
+        registeredBean.setPatientName(sicmedPatient.getPatientName());
+        registeredBean.setPatientNumber(sicmedPatient.getPatientNumber());
+        return querySuccessResponse(registeredBean);
+    }
+
+
+
+
+    /**
+     *@Author:      ykbian
      *@date_time:   2018/9/19 13:43
      *@Description: 查询挂号记录(0 正常 1改号   2退号   3正常结束)
      *@param:
-    */
+     */
     @ResponseBody
     @GetMapping("registeredRecord")
     public Map registeredRecord(String status,String beginDate,String endDate){
+        //创建返回对象
+        CountBean countBean = new CountBean();
+        double totalMoney = 0.00;
         List<RegisteredBean> registeredBeans  = new ArrayList<>();
         // 默认查询的时间范围是当天0时到现在
         Date startDate = DateTimeUtil.getDayBeginDate();
@@ -394,18 +460,16 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setDoctorId(registered.getDoctorId());
             bean.setId(registered.getId());
             registeredBeans.add(bean);
+
+            // 统计金额信息
+            totalMoney = totalMoney+Double.parseDouble(registered.getRegisteredPrice());
         }
-        return querySuccessResponse(registeredBeans);
+        // 三种情况分别统计，因此有多少条挂号记录，就有多少人数
+        countBean.setTotalPeople(sicmedRegistereds.size()+"");
+        countBean.setTotalMoney(totalMoney+"");
+        countBean.setRegisteredBeans(registeredBeans);
+        return querySuccessResponse(countBean);
     }
-
-    /**
-     *@Author:      ykbian
-     *@date_time:   2018/9/19 15:52
-     *@Description:  统计挂号，改号和退号数据（人数和金额）
-     *@param:
-    */
-
-
 
     /**
      *@Author:      ykbian
@@ -416,6 +480,7 @@ public class SicmedRegisteredController  extends BaseController {
     @ResponseBody
     @GetMapping("myPatients")
     public Map myPatients(String branch,String doctor,String beginDate,String endDate){
+        CountBean countBean = new CountBean();
        //查询条件   已经缴费  科室和医生信息相符
         List<RegisteredBean> registeredBeans = new ArrayList<>();
         SicmedRegistered sicmedRegistered = new SicmedRegistered();
@@ -437,7 +502,14 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setBranchId(branch);
         sicmedRegistered.setRegisteredBeginDate(startDate);
         sicmedRegistered.setRegisteredEndDate(endDate1);
+
+        // 这里查询到的是今日本科室相关权限下的所有患者信息，不分是否已经就诊
         List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.selectByParams(sicmedRegistered);
+
+
+        // 只查询已经就诊结束的挂号信息
+        sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_OVER);
+        List<SicmedRegistered> registeredsOver = sicmedRegisteredService.selectByParams(sicmedRegistered);
         if (sicmedRegistereds.isEmpty()){
             return queryEmptyResponse();
         }
@@ -463,15 +535,13 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setId(registered.getId());
             registeredBeans.add(bean);
         }
-        return querySuccessResponse(registeredBeans);
+        countBean.setRegisteredBeans(registeredBeans);
+        countBean.setIsCrue(registeredsOver.size()+"");
+        countBean.setPatientes(sicmedRegistereds.size()+"");
+        return querySuccessResponse(countBean);
     }
 
-    /**
-     *@Author:      ykbian
-     *@date_time:   2018/9/19 15:50
-     *@Description:  统计医生今日的诊疗数据（人数）
-     *@param:
-    */
+
 
 
     /**
@@ -482,13 +552,17 @@ public class SicmedRegisteredController  extends BaseController {
     */
     @ResponseBody
     @PostMapping("finishCure")
-    public Map finishCure(String registeredID){
+    public Map finishCure(@Validated(GroupID.class) RegisteredBean registeredBean){
+
         //获取医生信息
         SicmedRegistered sicmedRegistered = new SicmedRegistered();
         //只有派给本科室的订单，医生才有权限结束治疗
+        /**
+         *  此处有问题， setDoctorId  应该是经过医生的id获取其挂号等级
+         */
         sicmedRegistered.setDoctorId(getToken());
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_OVER);
-        sicmedRegistered.setId(registeredID);
+        sicmedRegistered.setId(registeredBean.getId());
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0) {
             return updateSuccseeResponse();
         }

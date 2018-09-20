@@ -1,5 +1,10 @@
 package com.sicmed.ehis.registration.bean;
 
+import com.sicmed.ehis.registration.entity.GroupID;
+import com.sicmed.ehis.registration.entity.GroupWithoutId;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.Date;
 
 /**
@@ -10,8 +15,12 @@ import java.util.Date;
 
 public class RegisteredBean  {
 
-
+    //主键
+    @NotNull(message = "id不能为空",groups = GroupID.class)
+    @Pattern(regexp = "^[A-Za-z0-9]{32}",message = "id必须是32位字符串",groups = GroupID.class)
     private String id;        //挂号信息的id
+
+
     private String patientNumber; // 患者编号
     private String patientName; // 患者名字
     private String patientSex; // 患者性别
@@ -19,15 +28,30 @@ public class RegisteredBean  {
     private String medicareNo;
     private String medicareType;
     private Date patientBirthday; // 患者生日
+
+    @NotNull(message = "身份证号码不能为空",groups = GroupWithoutId.class)
+    @Pattern(regexp = "^(\\d{6})(\\d{4})(\\d{2})(\\d{2})(\\d{3})([0-9]|X)$",message = "身份证号码不符合规则",groups = GroupWithoutId.class)
     private String patientCard; // 患者身份证
     private Date patientFirstdate; // 患者第一次就诊时间
     private Date patientLastdate; // 患者最后一次就诊时间
     private String patientAddress; // 患者住址
+
+    @Pattern(regexp = "^(13|14|15|16|17|18|19)\\d{9}$",message = "电话号码不符合规则",groups = GroupWithoutId.class)
     private String patientTel; // 患者电话
 
+    @NotNull(message = "科室id不能为空",groups = GroupWithoutId.class)
+    @Pattern(regexp = "^[A-Za-z0-9]{32}",message = "科室id必须是32位字符串",groups = GroupWithoutId.class)
     private String branchId;     //科室信息
+
+    @NotNull(message = "医生信息id不能为空",groups = GroupWithoutId.class)
+    @Pattern(regexp = "^[A-Za-z0-9]{32}",message = "医生信息必须是32位字符串",groups = GroupWithoutId.class)
     private String doctorId;     //医生信息
+
+    @NotNull(message = "医保类型不能为空",groups = GroupWithoutId.class)
+    @Pattern(regexp = "^[A-Za-z0-9]{32}",message = "医保类型信息必须是32位字符串",groups = GroupWithoutId.class)
     private String registeredTypeId;  //挂号类型
+
+    @NotNull(message = "挂号金额不能为空",groups = GroupWithoutId.class)
     private String registeredPrice;  // 挂号费
     private String registeredStatus; //挂号转态
 
