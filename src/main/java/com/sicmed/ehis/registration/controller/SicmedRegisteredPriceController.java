@@ -148,8 +148,8 @@ public class SicmedRegisteredPriceController extends BaseController{
     /**
      *@Author:      ykbian
      *@date_time:   2018/9/19 17:48
-     *@Description:  查询所有已经缴费的患者======和上面的代缴费的患者列表可以合并为一个接口
-     *@param:        ====这个接口也可以看做是查询缴费记录~~~~~~~~~~
+     *@Description:  查询所有已经缴费的患者======和上面的待缴费的患者列表可以合并为一个接口
+     *@param:
     */
     @ResponseBody
     @GetMapping("patientIsPay")

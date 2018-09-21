@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @Author: ykbian
  * @Date: 2018/9/17 18:57
- * @Todo:
+ * @Todo:   患者挂号控制
  */
 @Controller
 @RequestMapping("/ehis/sicmedRegistered")
