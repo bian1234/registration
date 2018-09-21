@@ -188,6 +188,7 @@ public class SicmedRegisteredController  extends BaseController {
              */
             redisSerive.set(key,value-1);
             redisSerive.set(key1,value1+1);
+            logger.info("改号成功");
             return updateSuccseeResponse();
         }
         return updateFailedResponse();
