@@ -25,15 +25,22 @@ public class SicmedRegistered extends BaseEntity{
 
     private Date registeredEndDate;
 
-    private String createUser;
+    /**
+     *  新增收费员信息和缴费类型信息
+     */
+    private String chargeUser;   //收费员信息
+    private String refundUser;   //退费者信息
+    private String payType;
+
+    private String createUser;   //挂号员信息
 
     private Date createDate;
 
-    private String updateUser;
+    private String updateUser;   //改号者信息
 
     private Date updateDate;
 
-    private String deleteUser;
+    private String deleteUser;    //退号者信息
 
     private Date deleteDate;
 
@@ -184,6 +191,31 @@ public class SicmedRegistered extends BaseEntity{
     public void setDelFlag(String delFlag) {
         this.delFlag = delFlag == null ? null : delFlag.trim();
     }
+
+    public String getChargeUser() {
+        return chargeUser;
+    }
+
+    public void setChargeUser(String chargeUser) {
+        this.chargeUser = chargeUser;
+    }
+
+    public String getPayType() {
+        return payType;
+    }
+
+    public void setPayType(String payType) {
+        this.payType = payType;
+    }
+
+    public String getRefundUser() {
+        return refundUser;
+    }
+
+    public void setRefundUser(String refundUser) {
+        this.refundUser = refundUser;
+    }
+
 
     @Override
     public String toString() {

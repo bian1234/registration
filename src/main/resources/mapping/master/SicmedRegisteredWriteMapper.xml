@@ -10,9 +10,15 @@
     <result column="registration_type" jdbcType="VARCHAR" property="registrationType" />
     <result column="registered_status" jdbcType="VARCHAR" property="registeredStatus" />
     <result column="registered_price" jdbcType="VARCHAR" property="registeredPrice" />
+    <result column="pay_type" jdbcType="VARCHAR" property="payType" />
+
     <result column="price_status" jdbcType="VARCHAR" property="priceStatus" />
     <result column="registered_begin_date" jdbcType="TIMESTAMP" property="registeredBeginDate" />
     <result column="registered_end_date" jdbcType="TIMESTAMP" property="registeredEndDate" />
+    <result column="charge_user" jdbcType="VARCHAR" property="chargeUser" />
+
+    <result column="refund_user" jdbcType="VARCHAR" property="refundUser" />
+
     <result column="create_user" jdbcType="VARCHAR" property="createUser" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
@@ -24,7 +30,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     id, patient_id, branch_id, doctor_id, registration_type, registered_status, registered_price, 
-    price_status, registered_begin_date, registered_end_date, create_user, create_date, 
+   pay_type, price_status, registered_begin_date, registered_end_date,charge_user, refund_user,create_user, create_date,
     update_user, update_date, delete_user, delete_date, remarks, del_flag
   </sql>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
@@ -34,15 +40,15 @@
   <insert id="insert" parameterType="com.sicmed.ehis.registration.entity.SicmedRegistered">
     insert into sicmed_registered (id, patient_id, branch_id, 
       doctor_id, registration_type, registered_status, 
-      registered_price, price_status, registered_begin_date, 
-      registered_end_date, create_user, create_date, 
+      registered_price,pay_type, price_status, registered_begin_date,
+      registered_end_date, charge_user,refund_user,create_user, create_date,
       update_user, update_date, delete_user, 
       delete_date, remarks, del_flag
       )
     values (#{id,jdbcType=VARCHAR}, #{patientId,jdbcType=VARCHAR}, #{branchId,jdbcType=VARCHAR}, 
       #{doctorId,jdbcType=VARCHAR}, #{registrationType,jdbcType=VARCHAR}, #{registeredStatus,jdbcType=VARCHAR}, 
-      #{registeredPrice,jdbcType=VARCHAR}, #{priceStatus,jdbcType=VARCHAR}, #{registeredBeginDate,jdbcType=TIMESTAMP}, 
-      #{registeredEndDate,jdbcType=TIMESTAMP}, #{createUser,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, 
+      #{registeredPrice,jdbcType=VARCHAR}, #{payType,jdbcType=VARCHAR}, #{priceStatus,jdbcType=VARCHAR}, #{registeredBeginDate,jdbcType=TIMESTAMP},
+      #{registeredEndDate,jdbcType=TIMESTAMP}, #{chargeUser,jdbcType=VARCHAR}, #{refundUser,jdbcType=VARCHAR},#{createUser,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
       #{updateUser,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, #{deleteUser,jdbcType=VARCHAR}, 
       #{deleteDate,jdbcType=TIMESTAMP}, #{remarks,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR}
       )
@@ -74,6 +80,12 @@
       <if test="registeredPrice != null">
         registered_price,
       </if>
+
+      <if test="payType != null">
+        pay_type,
+      </if>
+
+
       <if test="priceStatus != null">
         price_status,
       </if>
@@ -83,6 +95,13 @@
       <if test="registeredEndDate != null">
         registered_end_date,
       </if>
+      <if test="chargeUser != null">
+        charge_user,
+      </if>
+      <if test="refundUser != null">
+        refund_user,
+      </if>
+
       <if test="createUser != null">
         create_user,
       </if>
@@ -130,6 +149,12 @@
       <if test="registeredPrice != null">
         #{registeredPrice,jdbcType=VARCHAR},
       </if>
+
+      <if test="payType != null">
+        #{payType,jdbcType=VARCHAR},
+      </if>
+
+
       <if test="priceStatus != null">
         #{priceStatus,jdbcType=VARCHAR},
       </if>
@@ -139,6 +164,15 @@
       <if test="registeredEndDate != null">
         #{registeredEndDate,jdbcType=TIMESTAMP},
       </if>
+      <if test="chargeUser != null">
+        #{chargeUser,jdbcType=VARCHAR},
+      </if>
+
+      <if test="refundUser != null">
+        #{refundUser,jdbcType=VARCHAR},
+      </if>
+
+
       <if test="createUser != null">
         #{createUser,jdbcType=VARCHAR},
       </if>
@@ -186,6 +220,12 @@
       <if test="registeredPrice != null">
         registered_price = #{registeredPrice,jdbcType=VARCHAR},
       </if>
+
+      <if test="payType != null">
+        pay_type = #{payType,jdbcType=VARCHAR},
+      </if>
+
+
       <if test="priceStatus != null">
         price_status = #{priceStatus,jdbcType=VARCHAR},
       </if>
@@ -195,6 +235,17 @@
       <if test="registeredEndDate != null">
         registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP},
       </if>
+
+
+      <if test="chargeUser != null">
+        charge_user = #{chargeUser,jdbcType=VARCHAR},
+      </if>
+
+      <if test="refundUser != null">
+        refund_user = #{refundUser,jdbcType=VARCHAR},
+      </if>
+
+
       <if test="createUser != null">
         create_user = #{createUser,jdbcType=VARCHAR},
       </if>
@@ -230,9 +281,15 @@
       registration_type = #{registrationType,jdbcType=VARCHAR},
       registered_status = #{registeredStatus,jdbcType=VARCHAR},
       registered_price = #{registeredPrice,jdbcType=VARCHAR},
+      pay_type = #{payType,jdbcType=VARCHAR},
       price_status = #{priceStatus,jdbcType=VARCHAR},
       registered_begin_date = #{registeredBeginDate,jdbcType=TIMESTAMP},
       registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP},
+
+      charge_user = #{chargeUser,jdbcType=VARCHAR},
+
+      refund_user = #{refundUser,jdbcType=VARCHAR},
+
       create_user = #{createUser,jdbcType=VARCHAR},
       create_date = #{createDate,jdbcType=TIMESTAMP},
       update_user = #{updateUser,jdbcType=VARCHAR},

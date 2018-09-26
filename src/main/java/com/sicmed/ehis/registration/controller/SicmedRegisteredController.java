@@ -121,11 +121,18 @@ public class SicmedRegisteredController  extends BaseController {
             patientId = sp.getId();
         }
         SicmedRegistered sicmedRegistered = new SicmedRegistered();
+        // 患者信息
         sicmedRegistered.setPatientId(patientId);
+        //科室信息
         sicmedRegistered.setBranchId(registeredBean.getBranchId());
-        sicmedRegistered.setDoctorId(registeredBean.getDoctorId());
-        sicmedRegistered.setRegisteredPrice(registeredBean.getRegisteredPrice());
+        // 挂号类型
         sicmedRegistered.setRegistrationType(registeredBean.getRegisteredTypeId());
+        // 医生信息
+        sicmedRegistered.setDoctorId(registeredBean.getDoctorId());
+        // 挂号费
+        sicmedRegistered.setRegisteredPrice(registeredBean.getRegisteredPrice());
+        //缴费类型
+        sicmedRegistered.setPayType(registeredBean.getPayType());
         //删除状态
         sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
         // 获取创建者信息
@@ -175,7 +182,7 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setDoctorId(registeredBean.getDoctorId());
         sicmedRegistered.setRegisteredPrice(registeredBean.getRegisteredPrice());
         sicmedRegistered.setRegistrationType(registeredBean.getRegisteredTypeId());
-
+        sicmedRegistered.setPayType(registeredBean.getPayType());
         sicmedRegistered.setUpdateDate(new Date());
         sicmedRegistered.setUpdateUser(getToken());
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_EXCHANGE);
@@ -252,6 +259,7 @@ public class SicmedRegisteredController  extends BaseController {
         for (SicmedRegistered registered:registereds) {
             RegisteredBean bean = new RegisteredBean();
             SicmedPatient sicmedPatient = sicmedPatientService.selectById(registered.getPatientId());
+            bean.setId(registered.getId());
             bean.setPatientName(sicmedPatient.getPatientName());
             bean.setPatientNumber(sicmedPatient.getPatientNumber());
             bean.setPatientSex(sicmedPatient.getPatientSex());
@@ -259,6 +267,9 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setBranchId(registered.getBranchId());
             bean.setDoctorId(registered.getDoctorId());
             bean.setRegisteredStatus(registered.getRegisteredStatus());
+            bean.setRegisteredTypeId(registered.getRegistrationType());
+            bean.setPayType(registered.getPayType());
+            bean.setRegisteredPrice(registered.getRegisteredPrice());
             registeredBeans.add(bean);
         }
         return querySuccessResponse(registeredBeans);
@@ -290,9 +301,14 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setPatientNumber(sicmedPatient.getPatientNumber());
             bean.setPatientSex(sicmedPatient.getPatientSex());
             bean.setPatientAge(sicmedPatient.getPatientAge());
+            // 以下依次为科室，医生，挂号状态（正常，改号等），id,挂号类型，缴费类型,挂号费
             bean.setBranchId(registered.getBranchId());
             bean.setDoctorId(registered.getDoctorId());
             bean.setRegisteredStatus(registered.getRegisteredStatus());
+            bean.setId(registered.getId());
+            bean.setRegisteredTypeId(registered.getRegistrationType());
+            bean.setPayType(registered.getPayType());
+            bean.setRegisteredPrice(registered.getRegisteredPrice());
             registeredBeans.add(bean);
         }
         return querySuccessResponse(registeredBeans);
@@ -332,6 +348,7 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setBranchId(registered.getBranchId());
             bean.setRegisteredPrice(registered.getRegisteredPrice());
             bean.setRegisteredTypeId(registered.getRegistrationType());
+            bean.setPayType(registered.getPayType());
             bean.setId(registered.getId());
             // 患者信息部分
             bean.setPatientName(sicmedPatient.getPatientName());
@@ -368,7 +385,7 @@ public class SicmedRegisteredController  extends BaseController {
         registeredBean.setId(sicmedRegistered.getId());
         registeredBean.setDoctorId(sicmedRegistered.getDoctorId());
         registeredBean.setBranchId(sicmedRegistered.getBranchId());
-
+        registeredBean.setPayType(sicmedRegistered.getPayType());
         //患者个人信息部分
         registeredBean.setPatientAddress(sicmedPatient.getPatientAddress());
         registeredBean.setPatientCard(sicmedPatient.getPatientCard());
@@ -459,6 +476,7 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setRegisteredPrice(registered.getRegisteredPrice());
             bean.setBranchId(registered.getBranchId());
             bean.setDoctorId(registered.getDoctorId());
+            bean.setPayType(registered.getPayType());
             bean.setId(registered.getId());
             registeredBeans.add(bean);
 
@@ -480,7 +498,7 @@ public class SicmedRegisteredController  extends BaseController {
     */
     @ResponseBody
     @GetMapping("myPatients")
-    public Map myPatients(String branch,String doctor,String beginDate,String endDate){
+    public Map myPatients(String branch,String registeredType,String doctor,String beginDate,String endDate){
         CountBean countBean = new CountBean();
        //查询条件   已经缴费  科室和医生信息相符
         List<RegisteredBean> registeredBeans = new ArrayList<>();
@@ -501,6 +519,7 @@ public class SicmedRegisteredController  extends BaseController {
          */
         sicmedRegistered.setDoctorId(doctor);
         sicmedRegistered.setBranchId(branch);
+        sicmedRegistered.setRegistrationType(registeredType);
         sicmedRegistered.setRegisteredBeginDate(startDate);
         sicmedRegistered.setRegisteredEndDate(endDate1);
 
@@ -534,6 +553,7 @@ public class SicmedRegisteredController  extends BaseController {
             bean.setBranchId(registered.getBranchId());
             bean.setDoctorId(registered.getDoctorId());
             bean.setId(registered.getId());
+            bean.setPayType(registered.getPayType());
             registeredBeans.add(bean);
         }
         countBean.setRegisteredBeans(registeredBeans);

@@ -55,6 +55,9 @@ public class RegisteredBean  {
     private String registeredPrice;  // 挂号费
     private String registeredStatus; //挂号转态
 
+    @NotNull(message = "缴费类型不能为空",groups = GroupWithoutId.class)
+    @Pattern(regexp = "^[A-Za-z0-9]{32}",message = "缴费类型信息必须是32位字符串",groups = GroupWithoutId.class)
+    private String payType;
 
     public String getRegisteredStatus() {
         return registeredStatus;
@@ -200,6 +203,15 @@ public class RegisteredBean  {
         this.registeredPrice = registeredPrice;
     }
 
+
+
+    public String getPayType() {
+        return payType;
+    }
+
+    public void setPayType(String payType) {
+        this.payType = payType;
+    }
 
     @Override
     public String toString() {

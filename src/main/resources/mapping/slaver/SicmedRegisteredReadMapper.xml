@@ -9,9 +9,17 @@
     <result column="registration_type" jdbcType="VARCHAR" property="registrationType" />
     <result column="registered_status" jdbcType="VARCHAR" property="registeredStatus" />
     <result column="registered_price" jdbcType="VARCHAR" property="registeredPrice" />
+
+    <result column="pay_type" jdbcType="VARCHAR" property="payType" />
+
     <result column="price_status" jdbcType="VARCHAR" property="priceStatus" />
     <result column="registered_begin_date" jdbcType="TIMESTAMP" property="registeredBeginDate" />
     <result column="registered_end_date" jdbcType="TIMESTAMP" property="registeredEndDate" />
+
+    <result column="charge_user" jdbcType="VARCHAR" property="chargeUser" />
+
+    <result column="refund_user" jdbcType="VARCHAR" property="refundUser" />
+
     <result column="create_user" jdbcType="VARCHAR" property="createUser" />
     <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
     <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
@@ -23,7 +31,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     id, patient_id, branch_id, doctor_id, registration_type, registered_status, registered_price,
-    price_status, registered_begin_date, registered_end_date, create_user, create_date, 
+    pay_type,price_status, registered_begin_date, registered_end_date,charge_user,refund_user, create_user, create_date,
     update_user, update_date, delete_user, delete_date, remarks, del_flag
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -61,6 +69,12 @@
       <if test="registeredPrice != null and registeredPrice != ''">
         AND registered_price = #{registeredPrice,jdbcType=VARCHAR}
       </if>
+
+      <if test="payType != null and payType != ''">
+        AND pay_type = #{payType,jdbcType=VARCHAR}
+      </if>
+
+
       <if test="priceStatus != null and priceStatus != ''">
         AND price_status = #{priceStatus,jdbcType=VARCHAR}
       </if>
@@ -71,6 +85,15 @@
         AND ( registered_end_date = #{registeredEndDate,jdbcType=TIMESTAMP}
         OR registered_end_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP})
       </if>
+
+      <if test="chargeUser != null and chargeUser != ''">
+        AND charge_user = #{chargeUser,jdbcType=VARCHAR}
+      </if>
+
+      <if test="refundUser != null and refundUser != ''">
+        AND refund_user = #{refundUser,jdbcType=VARCHAR}
+      </if>
+
       <if test="createUser != null and createUser != ''">
         AND create_user = #{createUser,jdbcType=VARCHAR}
       </if>
@@ -155,6 +178,12 @@
       <if test="registeredPrice != null and registeredPrice != ''">
         AND registered_price = #{registeredPrice,jdbcType=VARCHAR}
       </if>
+
+      <if test="payType != null and payType != ''">
+        AND pay_type = #{payType,jdbcType=VARCHAR}
+      </if>
+
+
       <if test="priceStatus != null and priceStatus != ''">
         AND price_status = #{priceStatus,jdbcType=VARCHAR}
       </if>
@@ -164,6 +193,15 @@
       <if test="registeredEndDate != null and registeredEndDate != ''">
         AND registered_end_date &lt; #{registeredEndDate,jdbcType=TIMESTAMP}
       </if>
+
+      <if test="chargeUser != null and chargeUser != ''">
+        AND charge_user = #{chargeUser,jdbcType=VARCHAR}
+      </if>
+
+      <if test="refundUser != null and refundUser != ''">
+        AND refund_user = #{refundUser,jdbcType=VARCHAR}
+      </if>
+
       <if test="createUser != null and createUser != ''">
         AND create_user = #{createUser,jdbcType=VARCHAR}
       </if>

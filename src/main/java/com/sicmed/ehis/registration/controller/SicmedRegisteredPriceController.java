@@ -57,7 +57,7 @@ public class SicmedRegisteredPriceController extends BaseController{
             return updateFailedResponse();
         }
         sicmedRegistered.setPriceStatus(Constant.PRICE_EXCHARGE);
-        sicmedRegistered.setUpdateUser(getToken());
+        sicmedRegistered.setChargeUser(getToken());
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0){
             return updateSuccseeResponse();
         }
@@ -80,6 +80,7 @@ public class SicmedRegisteredPriceController extends BaseController{
             return queryEmptyResponse();
         }
         sicmedRegistered.setPriceStatus(Constant.PRICE_NOT_PAY);
+        sicmedRegistered.setRefundUser(getToken());
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0){
             return updateSuccseeResponse();
         }
@@ -139,6 +140,7 @@ public class SicmedRegisteredPriceController extends BaseController{
             registeredBean.setDoctorId(registered.getDoctorId());
             registeredBean.setRegisteredTypeId(registered.getRegistrationType());
             registeredBean.setRegisteredPrice(registered.getRegisteredPrice());
+            registeredBean.setPayType(registered.getPayType());
             registeredBeans.add(registeredBean);
         }
         return querySuccessResponse(registeredBeans);
@@ -196,6 +198,7 @@ public class SicmedRegisteredPriceController extends BaseController{
             registeredBean.setDoctorId(registered.getDoctorId());
             registeredBean.setRegisteredTypeId(registered.getRegistrationType());
             registeredBean.setRegisteredPrice(registered.getRegisteredPrice());
+            registeredBean.setPayType(registered.getPayType());
             registeredBeans.add(registeredBean);
         }
         return querySuccessResponse(registeredBeans);
