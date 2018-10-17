@@ -79,7 +79,7 @@ public class SicmedRegisteredPriceController extends BaseController{
         if (sicmedRegistered == null){
             return queryEmptyResponse();
         }
-        sicmedRegistered.setPriceStatus(Constant.PRICE_NOT_PAY);
+        sicmedRegistered.setPriceStatus(Constant.PRICE_RETURN);
         sicmedRegistered.setRefundUser(getToken());
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0){
             return updateSuccseeResponse();
@@ -118,7 +118,7 @@ public class SicmedRegisteredPriceController extends BaseController{
         sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
         sicmedRegistered.setPriceStatus(Constant.PRICE_NOT_PAY);
         List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.patientNotPay(sicmedRegistered);
-        if (sicmedRegistereds == null){
+        if (sicmedRegistereds.isEmpty()){
             return queryEmptyResponse();
         }
         for (SicmedRegistered registered:sicmedRegistereds) {
@@ -176,7 +176,7 @@ public class SicmedRegisteredPriceController extends BaseController{
         sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
         sicmedRegistered.setPriceStatus(Constant.PRICE_EXCHARGE);
         List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.patientNotPay(sicmedRegistered);
-        if (sicmedRegistereds == null){
+        if (sicmedRegistereds.isEmpty()){
             return queryEmptyResponse();
         }
         for (SicmedRegistered registered:sicmedRegistereds) {
@@ -245,7 +245,7 @@ public class SicmedRegisteredPriceController extends BaseController{
         sicmedRegistered.setRegisteredBeginDate(startDate);
         sicmedRegistered.setRegisteredEndDate(endDate1);
         List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.selectByParams(sicmedRegistered);
-        if (sicmedRegistereds == null){
+        if (sicmedRegistereds.isEmpty()){
             return queryEmptyResponse();
         }
         for (SicmedRegistered registered:sicmedRegistereds) {

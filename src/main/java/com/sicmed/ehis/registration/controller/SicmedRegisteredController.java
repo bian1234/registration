@@ -60,7 +60,14 @@ public class SicmedRegisteredController  extends BaseController {
         //号源不足的话直接返回
         //redis中的key是科室id+医生信息id
         String key = registeredBean.getBranchId()+registeredBean.getDoctorId();
-        int value = redisSerive.get(key);
+        String valueStr = redisSerive.get(key);
+        // 不存在号源信息
+        if (valueStr == null){
+            logger.info("号源信息不存在");
+            return insertFailedResponse();
+        }
+        // 号源信息存在，但是号源不足
+        int value = Integer.parseInt(valueStr);
         if ( value< 1){
             logger.info("挂号，但是号源不足");
             return insertFailedResponse();
@@ -148,7 +155,7 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setRegisteredEndDate(DateTimeUtil.getCureEndDate());
         if (sicmedRegisteredService.insertSelective(sicmedRegistered) > 0){
             // 号源信息减一
-            redisSerive.set(key,value-1);
+            redisSerive.set(key,(value-1)+"");
             return insertSuccseeResponse();
         }
         return insertFailedResponse();
@@ -168,10 +175,17 @@ public class SicmedRegisteredController  extends BaseController {
          *  从缓存中查询剩余号源数量 ，如果号源数量不足，则改号失败
          */
         String key = registeredBean.getBranchId()+registeredBean.getDoctorId();
-        int value = redisSerive.get(key);
+        String valueStr = redisSerive.get(key);
+        // 不存在号源信息
+        if (valueStr == null){
+            logger.info("号源信息不存在");
+            return updateFailedResponse();
+        }
+        // 号源信息存在，但是号源不足
+        int value = Integer.parseInt(valueStr);
         if ( value< 1){
             logger.info("改号，号源不足！");
-            return insertFailedResponse();
+            return updateFailedResponse();
         }
 //         将信息的挂号信息赋值给原来的挂号数据
 //        这里只能是从数据库中根据原来的id查询信息，直接new对象的话会丢失信息
@@ -188,13 +202,19 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_EXCHANGE);
         if (sicmedRegisteredService.updateSelective(sicmedRegistered) > 0){
            //根据id找到之前的科室信息和医生信息
-            int value1 = redisSerive.get(key1);
-
+            String valueStr1 = redisSerive.get(key1);
+            // 不存在号源信息
+            if (valueStr1 == null){
+                logger.info("号源信息不存在");
+                return insertFailedResponse();
+            }
+            // 号源信息存在，但是号源不足
+            int value1 = Integer.parseInt(valueStr1);
             /**
              *  新的科室号源减一  之前的科室号源加一
              */
-            redisSerive.set(key,value-1);
-            redisSerive.set(key1,value1+1);
+            redisSerive.set(key,(value-1)+"");
+            redisSerive.set(key1,(value1+1)+"");
             logger.info("改号成功");
             return updateSuccseeResponse();
         }
@@ -228,8 +248,15 @@ public class SicmedRegisteredController  extends BaseController {
              *   退出的号源信息加一
              */
             String key = sicmedRegistered.getBranchId()+sicmedRegistered.getDoctorId();
-            int value = redisSerive.get(key);
-            redisSerive.set(key,value+1);
+            // 不存在号源信息
+            String valueStr = redisSerive.get(key);
+            if (valueStr == null){
+                logger.info("号源信息不存在");
+                return insertFailedResponse();
+            }
+            // 号源信息存在，但是号源不足
+            int value = Integer.parseInt(valueStr);
+            redisSerive.set(key,(value+1)+"");
             logger.info("患者退号");
             return deleteSuccseeResponse();
         }
@@ -253,7 +280,7 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_CURING);
         List<SicmedRegistered> registereds = sicmedRegisteredService.selectByParams2(sicmedRegistered);
-        if (registereds == null){
+        if (registereds.isEmpty()){
             return queryEmptyResponse();
         }
         for (SicmedRegistered registered:registereds) {
@@ -291,7 +318,7 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setDelFlag(Constant.DEL_FLAG_USABLE);
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_CURING);
         List<SicmedRegistered> registereds = sicmedRegisteredService.selectByParams2(sicmedRegistered);
-        if (registereds == null){
+        if (registereds.isEmpty()){
             return queryEmptyResponse();
         }
         for (SicmedRegistered registered:registereds) {
@@ -522,11 +549,8 @@ public class SicmedRegisteredController  extends BaseController {
         sicmedRegistered.setRegistrationType(registeredType);
         sicmedRegistered.setRegisteredBeginDate(startDate);
         sicmedRegistered.setRegisteredEndDate(endDate1);
-
         // 这里查询到的是今日本科室相关权限下的所有患者信息，不分是否已经就诊
         List<SicmedRegistered> sicmedRegistereds = sicmedRegisteredService.selectByParams(sicmedRegistered);
-
-
         // 只查询已经就诊结束的挂号信息
         sicmedRegistered.setRegisteredStatus(Constant.PATIENT_REGISTERED_OVER);
         List<SicmedRegistered> registeredsOver = sicmedRegisteredService.selectByParams(sicmedRegistered);

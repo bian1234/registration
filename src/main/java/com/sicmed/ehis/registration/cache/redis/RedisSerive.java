@@ -18,35 +18,24 @@ public class RedisSerive {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-//
-//    @Autowired
-//    private JsonUtil<Doctor> jsonUtil;
 
-    public void set(String key,int val) {
+
+    public void set(String key,String val) {
         ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
-        String val0 = val+"";
+        String val0 = val;
         valueOperations.set(key,val0);
     }
 
 
 
-    public int get(String key) {
+    public String get(String key) {
         ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
-        int value = Integer.parseInt(valueOperations.get(key));
+        String value = valueOperations.get(key);
         return value;
     }
-
-//    public Doctor getDoctor(String key) {
-//        ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
-//        return jsonUtil.jsonStrToObject(valueOperations.get(key));
-//    }
 
     public boolean remove(String key) {
         ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
         return stringRedisTemplate.delete(key);
     }
-//    public WechatUser getWechatUser(String key) {
-//        ValueOperations<String,String> valueOperations = stringRedisTemplate.opsForValue();
-//        return jsonUtil.jsonStrToWechatUser(valueOperations.get(key));
-//    }
 }
